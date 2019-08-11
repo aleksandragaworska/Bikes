@@ -2,6 +2,7 @@ from django.shortcuts import render
 from django.http import HttpResponse
 from .parse import get_data
 from .models import Station, StationState
+import pytz
 
 
 def add_to_db(request):
@@ -24,3 +25,32 @@ def add_to_db(request):
         state.save()
 
     return HttpResponse('Added!')
+
+
+def station_detail(request, station_id):
+    info = Station.objects.get(station_id=station_id)
+    state = StationState.objects.filter(station_id=station_id).order_by('-date')[0]
+
+    date_time_UTC = state.date
+    timezone = pytz.timezone("Europe/Warsaw")
+    date_time = date_time_UTC.astimezone(timezone)
+    time = date_time.strftime('%H:%M:%S')
+    day = date_time.strftime('%d.%m.%Y')
+    weekday = date_time.strftime('%A')
+    to_polish = {'Monday': 'poniedziałek',
+                 'Tuesday': 'wtorek',
+                 'Wednesday': 'środa',
+                 'Thursday': 'czwartek',
+                 'Friday': 'piątek',
+                 'Saturday': 'sobota',
+                 'Sunday': 'niedziela'}
+
+    return HttpResponse(
+        f'''
+        Stacja {info.name} o numerze {info.station_id}
+        posiada stojaki w liczbie {info.racks}.
+        <br><br>
+        O godzinie {time} dnia {day} ({to_polish[weekday]}) liczba wolnych
+        rowerów do wypożyczenia wynosi {state.bikes_count}.
+        '''
+    )
