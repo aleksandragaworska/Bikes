@@ -3,6 +3,40 @@ from django.http import HttpResponse
 from .parse import get_data
 from .models import Station, StationState
 import pytz
+import logging
+
+logging.config.dictConfig({
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'console': {
+            'format': '%(name)-12s %(levelname)-8s %(message)s'
+        },
+        'file': {
+            'format': '%(asctime)s %(name)-12s %(levelname)-8s %(message)s'
+        }
+    },
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+            'formatter': 'console'
+        },
+        'file': {
+            'level': 'DEBUG',
+            'class': 'logging.FileHandler',
+            'formatter': 'file',
+            'filename': 'debug.log'
+        }
+    },
+    'loggers': {
+        '': {
+            'level': 'DEBUG',
+            'handlers': ['console', 'file']
+        }
+    }
+})
+
+logger = logging.getLogger(__name__)
 
 
 def add_to_db(request):
@@ -16,6 +50,7 @@ def add_to_db(request):
         station.lon = station_info[3]
         station.racks = station_info[4]
         station.save()
+    logger.info(f'Saved station info for {len(station_infos)} stations')
 
     for station_state in station_states:
         state = StationState()
@@ -23,6 +58,7 @@ def add_to_db(request):
         state.date = station_state[2]
         state.bikes_count = station_state[1]
         state.save()
+    logger.info(f'Saved station state for {len(station_states)} stations')
 
     return HttpResponse('Added!')
 
