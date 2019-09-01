@@ -90,3 +90,9 @@ def station_detail(request, station_id):
         rowerów do wypożyczenia wynosi {state.bikes_count}.
         '''
     )
+
+
+def stations_list(request):
+    station_infos = Station.objects.all()
+    context = {'stations_list': station_infos}
+    return render(request, 'bikesapp/stations_list.html', context)

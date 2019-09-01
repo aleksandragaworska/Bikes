@@ -1,0 +1,9 @@
+{% if stations_list %}
+    <ul>
+    {% for station in stations_list %}
+        <li><a href="/api/{{ station.station_id }}/">{{ station.name }}</a></li>
+    {% endfor %}
+    </ul>
+{% else %}
+    <p>No stations are available.</p>
+{% endif %}
